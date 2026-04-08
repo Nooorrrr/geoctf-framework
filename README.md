@@ -2,6 +2,8 @@
 
 Free and open-source framework for GEOSINT challenges in CTFs. Drop an image, set the coordinates and a flag in the config file, build the Docker container and you have a ready-to-go GeoGuessr-style challenge for your competition.
 
+![Demo](demo.png)
+
 ## Features
 
 - **GeoGuessr-style UI** — Fullscreen image/panorama viewer with a collapsible map widget in the bottom-right corner.
