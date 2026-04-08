@@ -81,6 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lat: pos.lat, lon: pos.lng }),
       });
+      // Rate limit warning
+      if (resp.status === 429) {
+        resultContent.innerHTML =
+          '<div class="result-icon fail">&#9888;</div>' +
+          '<div class="result-title fail">Too Many Requests</div>' +
+          '<div class="result-msg">You are being rate limited. Try again later.</div>';
+        return;
+      }
       const j = await resp.json();
       if (j.success) {
         resultContent.innerHTML =
