@@ -1,0 +1,12 @@
+{
+  "title": "Where was this photo taken?",
+  "description": "Find the exact location of this image",
+  "image": "challenge.jpg",
+  "image_type": "360",
+  "lat": 40.4168,
+  "lon": -3.7038,
+  "threshold_meters": 100,
+  "flag": "GEOCTF{madrid_puerta_del_sol}",
+  "logger": true,
+  "behind_proxy": false
+}

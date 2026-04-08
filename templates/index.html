@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Pannellum (360 panorama viewer) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+  <!-- App styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- Fullscreen viewer -->
+  <div id="viewer-container" data-image-type="{{ image_type }}" data-image-src="/static/{{ image }}">
+    <div id="pano"></div>
+    <div id="image-viewer">
+      <img id="challenge-img" src="/static/{{ image }}" alt="Challenge" draggable="false">
+    </div>
+  </div>
+
+  <!-- Info overlay — top left -->
+  <div id="info-overlay">
+    <h1>{{ title }}</h1>
+    <p>{{ description }}</p>
+    <p class="credit">geoctf-framework by Guchi</p>
+  </div>
+
+  <!-- Map widget — bottom right -->
+  <div id="map-widget" class="map-small">
+    <button id="map-expand-btn" title="Expand map">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M1 1h5v2H3v3H1V1zm9 0h5v5h-2V3h-3V1zM1 10h2v3h3v2H1v-5zm12 3h-3v2h5v-5h-2v3z"/>
+      </svg>
+    </button>
+    <div id="map"></div>
+    <div id="map-actions">
+      <button id="submit-btn" disabled>GUESS</button>
+      <button id="reset-btn" title="Reset marker">&#8634;</button>
+    </div>
+  </div>
+
+  <!-- Result modal -->
+  <div id="result-modal">
+    <div id="result-box">
+      <div id="result-content"></div>
+      <button id="result-close">Continue</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+  <script src="/static/js/map.js"></script>
+</body>
+</html>

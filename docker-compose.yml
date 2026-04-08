@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  geoctf:
+    build: .
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    environment:
+      - GEOCTF_CONFIG=/app/config.json

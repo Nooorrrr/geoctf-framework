@@ -1,0 +1,5 @@
+flask
+flask-compress
+flask-limiter
+geopy
+gunicorn
