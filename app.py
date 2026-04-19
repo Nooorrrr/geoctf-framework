@@ -28,7 +28,7 @@ CONFIG_PATH = os.environ.get('GEOCTF_CONFIG', 'config.json')
 try:
     with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
         CONFIG = json.load(f)
-except Exception as e:
+except Exception:
     CONFIG = None
 
 # if behind a reverse proxy, use X-Forwarded-For to get the real client IP
@@ -60,19 +60,68 @@ else:
     logger.setLevel(logging.CRITICAL)
     logger.addHandler(logging.NullHandler())
 
-# strip EXIF metadata from the challenge image on startup
-# prevents leaking GPS coords or Google Image IDs from Street View downloads
-if CONFIG and CONFIG.get('image'):
-    _img_path = os.path.join('static', CONFIG['image'])
-    if os.path.isfile(_img_path):
+
+def _normalize_challenge(challenge, global_title='', global_description=''):
+    normalized = {
+        'image': challenge.get('image', ''),
+        'image_type': challenge.get('image_type', 'normal'),
+        'title': challenge.get('title', global_title),
+        'description': challenge.get('description', global_description),
+        'threshold_meters': float(challenge.get('threshold_meters', 100)),
+        'lat': float(challenge.get('lat', 0)),
+        'lon': float(challenge.get('lon', 0)),
+    }
+    return normalized
+
+
+def _build_challenges(config):
+    if not config:
+        return [], []
+
+    global_title = config.get('title', '')
+    global_description = config.get('description', '')
+    raw_challenges = []
+    if isinstance(config.get('challenges'), list) and config['challenges']:
+        raw_challenges = config['challenges']
+    elif config.get('image'):
+        raw_challenges = [config]
+
+    internal = []
+    public = []
+    for raw in raw_challenges:
         try:
-            subprocess.run(['exiftool', '-all=', '-overwrite_original', _img_path],
-                           check=True, capture_output=True)
-            logger.info('Stripped EXIF metadata from %s', _img_path)
-        except FileNotFoundError:
-            logger.warning('exiftool not installed, skipping metadata strip for %s', _img_path)
-        except subprocess.CalledProcessError as e:
-            logger.warning('Failed to strip metadata from %s: %s', _img_path, e)
+            normalized = _normalize_challenge(raw, global_title, global_description)
+        except (TypeError, ValueError):
+            continue
+        if not normalized['image'] or normalized['lat'] is None or normalized['lon'] is None:
+            continue
+        internal.append(normalized)
+        public.append({
+            'image': normalized['image'],
+            'image_type': normalized['image_type'],
+            'title': normalized['title'],
+            'description': normalized['description'],
+        })
+
+    return internal, public
+
+
+CHALLENGES, PUBLIC_CHALLENGES = _build_challenges(CONFIG)
+
+# strip EXIF metadata from the challenge images on startup
+# prevents leaking GPS coords or Google Image IDs from Street View downloads
+if CONFIG:
+    for challenge in CHALLENGES:
+        _img_path = os.path.join('static', challenge['image'])
+        if os.path.isfile(_img_path):
+            try:
+                subprocess.run(['exiftool', '-all=', '-overwrite_original', _img_path],
+                               check=True, capture_output=True)
+                logger.info('Stripped EXIF metadata from %s', _img_path)
+            except FileNotFoundError:
+                logger.warning('exiftool not installed, skipping metadata strip for %s', _img_path)
+            except subprocess.CalledProcessError as e:
+                logger.warning('Failed to strip metadata from %s: %s', _img_path, e)
 
 
 def validate_coords(lat, lon):
@@ -102,9 +151,18 @@ def constant_time_wait(start):
 # Default static main challenge page
 @app.route('/')
 def index():
-    if not CONFIG:
+    if not CONFIG or not CHALLENGES:
         return "Server misconfigured.", 500
-    return render_template('index.html', title=CONFIG.get('title', ''), description=CONFIG.get('description', ''), image=CONFIG.get('image', ''), image_type=CONFIG.get('image_type', 'normal'))
+
+    first = PUBLIC_CHALLENGES[0]
+    return render_template(
+        'index.html',
+        title=CONFIG.get('title', ''),
+        description=CONFIG.get('description', ''),
+        challenges=PUBLIC_CHALLENGES,
+        first_image=first.get('image', ''),
+        first_image_type=first.get('image_type', 'normal'),
+    )
 
 # Check cords endpoint — 10 requests per minute per IP
 @app.route('/check', methods=['POST'])
@@ -112,7 +170,7 @@ def index():
 def check():
     start = time.time()
 
-    if not CONFIG:
+    if not CONFIG or not CHALLENGES:
         constant_time_wait(start)
         return jsonify(success=False, message='Server misconfigured.'), 500
 
@@ -123,6 +181,17 @@ def check():
 
     lat = data.get('lat')
     lon = data.get('lon')
+    idx = data.get('index')
+
+    try:
+        idx = int(idx)
+    except (TypeError, ValueError):
+        constant_time_wait(start)
+        return jsonify(success=False, message='Invalid request.'), 400
+
+    if idx < 0 or idx >= len(CHALLENGES):
+        constant_time_wait(start)
+        return jsonify(success=False, message='Invalid request.'), 400
 
     if not validate_coords(lat, lon):
         logger.info('Invalid coords attempt: %s', data)
@@ -132,19 +201,22 @@ def check():
     # always compute distance
     try:
         user_loc = (float(lat), float(lon))
-        target_loc = (float(CONFIG['lat']), float(CONFIG['lon']))
+        target_challenge = CHALLENGES[idx]
+        target_loc = (target_challenge['lat'], target_challenge['lon'])
         distance_m = geodesic(user_loc, target_loc).meters
-        success = distance_m <= float(CONFIG.get('threshold_meters', 100))
+        success = distance_m <= target_challenge['threshold_meters']
     except Exception:
         logger.exception('Error calculating distance for %s', data)
         constant_time_wait(start)
         return jsonify(success=False, message='Wrong location. Try again.'), 400
 
-    logger.info('Attempt - lat: %s lon: %s result: %s', lat, lon, 'success' if success else 'fail')
+    logger.info('Attempt idx=%s lat=%s lon=%s result=%s', idx, lat, lon, 'success' if success else 'fail')
 
-    # build response before waiting
     if success:
-        resp = jsonify(success=True, flag=CONFIG.get('flag', ''))
+        if idx + 1 < len(CHALLENGES):
+            resp = jsonify(success=True, next_index=idx + 1)
+        else:
+            resp = jsonify(success=True, final=True, flag=CONFIG.get('flag', ''))
     else:
         resp = jsonify(success=False, message='Wrong location. Try again.'), 400
 
