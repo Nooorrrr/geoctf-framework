@@ -1,0 +1,9 @@
+2026-04-19 12:33:05,317 - INFO - Stripped EXIF metadata from static/challenge.jpg
+2026-04-19 12:33:05,544 - INFO - Stripped EXIF metadata from static/challenge.jpg
+2026-04-19 12:33:05,737 - INFO - Stripped EXIF metadata from static/challenge.jpg
+2026-04-19 20:08:49,594 - INFO - Stripped EXIF metadata from static/challenge.jpg
+2026-04-19 20:08:49,763 - INFO - Stripped EXIF metadata from static/challenge.jpg
+2026-04-19 20:08:49,941 - INFO - Stripped EXIF metadata from static/challenge.jpg
+2026-04-19 20:09:29,502 - INFO - Attempt idx=0 lat=40.212440718286466 lon=-3.3398437500000004 result=success
+2026-04-19 20:09:35,823 - INFO - Attempt idx=1 lat=40.44694705960048 lon=-3.7573242187500004 result=success
+2026-04-19 20:09:40,584 - INFO - Attempt idx=2 lat=40.6306300839918 lon=-3.4936523437500004 result=success
