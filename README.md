@@ -1,6 +1,6 @@
-# GeoCTF Framework
+# GeoCTF Framework (Tweaked version)
 
-Free and open-source framework for GEOSINT challenges in CTFs. Drop an image, set the coordinates and a flag in the config file, build the Docker container and you have a ready-to-go GeoGuessr-style challenge for your competition.
+This is a forked version of the free and open-source framework for GEOSINT challenges in CTFs, **That supports multiple challenges**. Drop an image, set the coordinates and a flag in the config file, build the Docker container and you have a ready-to-go GeoGuessr-style challenge for your competition.
 
 ![Demo](demo.png)
 
@@ -69,13 +69,28 @@ Example:
 ```json
 {
   "title": "Where was this photo taken?",
-  "description": "Find the exact location of this image",
-  "image": "challenge.jpg",
-  "image_type": "360",
-  "lat": 40.4168,
-  "lon": -3.7038,
-  "threshold_meters": 100,
-  "flag": "GEOCTF{madrid_puerta_del_sol}",
+  "description": "Find the exact location of each image. Complete all challenges to get the flag.",
+  "challenges": [
+    {
+      "title": "Challenge 1",
+      "description": "Find the exact location of the first image.",
+      "image": "challenge.jpg",
+      "image_type": "360",
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "threshold_meters": 100
+    },
+    {
+      "title": "Challenge 1",
+      "description": "Find the exact location of the first image.",
+      "image": "challenge.jpg",
+      "image_type": "360",
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "threshold_meters": 100
+    }
+  ],
+  "flag": "GEOCTF{Lesgooo_you_geoguesser_pro}",
   "logger": true,
   "behind_proxy": false
 }
