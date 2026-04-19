@@ -1,11 +1,36 @@
 {
   "title": "Where was this photo taken?",
-  "description": "Find the exact location of this image",
-  "image": "challenge.jpg",
-  "image_type": "360",
-  "lat": 40.4168,
-  "lon": -3.7038,
-  "threshold_meters": 100,
+  "description": "Find the exact location of each image. Complete all challenges to get the flag.",
+  "challenges": [
+    {
+      "title": "Challenge 1",
+      "description": "Find the exact location of the first image.",
+      "image": "challenge.jpg",
+      "image_type": "360",
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "threshold_meters": 100000
+    },
+    {
+      "title": "Challenge 1",
+      "description": "Find the exact location of the first image.",
+      "image": "challenge.jpg",
+      "image_type": "360",
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "threshold_meters": 1000000
+    },
+    {
+      "title": "Challenge 1",
+      "description": "Find the exact location of the first image.",
+      "image": "challenge.jpg",
+      "image_type": "360",
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "threshold_meters": 1000000
+    }
+
+  ],
   "flag": "GEOCTF{madrid_puerta_del_sol}",
   "logger": true,
   "behind_proxy": false
